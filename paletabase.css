@@ -1,0 +1,30 @@
+:root {
+  /* Paleta Principal - Indigo */
+  --color-primary: #4f46e5;    /* indigo-600 */
+  --color-primary-hover: #4338ca; /* indigo-700 */
+
+  /* Semântica */
+  --color-success: #10b981;    /* emerald-500 */
+  --color-danger: #f43f5e;     /* rose-500 */
+  --color-warning: #f59e0b;    /* amber-500 */
+  --color-info: #0ea5e9;       /* sky-500 */
+
+  /* Superfícies e Texto (Modo Claro) */
+  --bg-main: #f9fafb;          /* gray-50 */
+  --bg-card: #ffffff;          /* white */
+  --text-main: #0f172a;        /* slate-900 */
+  --text-muted: #64748b;       /* slate-500 */
+  --border-color: #e2e8f0;     /* gray-200 */
+}
+
+/* Modo Noturno - Ativado pela classe .dark no <html> ou <body> */
+.dark {
+  --bg-main: #0f172a;          /* slate-900 */
+  --bg-card: #1e293b;          /* slate-800 */
+  --text-main: #f8fafc;        /* slate-50 */
+  --text-muted: #94a3b8;       /* slate-400 */
+  --border-color: #334155;     /* slate-700 */
+  
+  /* Ajuste leve no primary para brilhar melhor no escuro */
+  --color-primary: #6366f1;    /* indigo-500 */
+}
