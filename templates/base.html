@@ -1,39 +1,148 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Plataforma de Exercícios{% endblock %}</title>
+    <style>
+        :root {
+            --color-primary: #4f46e5;
+            --color-primary-hover: #4338ca;
+
+            --color-success: #10b981;
+            --color-danger: #f43f5e;
+            --color-warning: #f59e0b;
+            --color-info: #0ea5e9;
+
+            --bg-main: #f9fafb;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        .dark {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --color-primary: #6366f1;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-main);
+            color: var(--text-main);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-hover);
+        }
+
+        /* Ajuste para garantir que os inputs do Django herdem o estilo do Tailwind */
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
+
+<body class="font-sans" style="background: var(--bg-main); color: var(--text-main);">
 
     <nav class="bg-indigo-600 text-white shadow-md" x-data="{ open: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
-                    <a href="/" class="text-xl font-bold tracking-tight">EduAdapt</a>
+                    <a href="{% url 'redirect_after_login' %}" class="text-xl font-bold tracking-tight">EduAdapt</a>
                 </div>
-                
+
                 <div class="hidden md:flex space-x-4">
                     {% if user.is_authenticated %}
-                        <a href="#" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Simulados</a>
-                        <a href="#" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Meu Progresso</a>
-                        <form action="{% url 'logout' %}" method="post" class="inline">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-indigo-800 hover:bg-red-600 px-3 py-2 rounded-md transition">Sair</button>
-                        </form>
+                    <a href="#" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Simulados</a>
+                    <a href="#" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Meu Progresso</a>
+                    <form action="{% url 'logout' %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="bg-indigo-800 hover:bg-red-600 px-3 py-2 rounded-md transition">Sair</button>
+                    </form>
                     {% else %}
-                        <a href="{% url 'login' %}" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Entrar</a>
+                    <a href="{% url 'login' %}" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Entrar</a>
+                    <a href="{% url 'cadastro' %}" class="hover:bg-indigo-700 px-3 py-2 rounded-md">Cadastrar</a>
                     {% endif %}
+                    <button onclick="document.documentElement.classList.toggle('dark')">🌙</button>
                 </div>
 
                 <div class="md:hidden">
                     <button @click="open = !open" class="p-2 rounded-md hover:bg-indigo-700 focus:outline-none">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            <path x-show="!open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                            <path x-show="open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
@@ -42,11 +151,11 @@
 
         <div x-show="open" class="md:hidden bg-indigo-700 px-2 pt-2 pb-3 space-y-1">
             {% if user.is_authenticated %}
-                <a href="#" class="block px-3 py-2 rounded-md hover:bg-indigo-800">Simulados</a>
-                <a href="#" class="block px-3 py-2 rounded-md hover:bg-indigo-800">Meu Progresso</a>
-                <a href="{% url 'logout' %}" class="block px-3 py-2 rounded-md hover:bg-red-600">Sair</a>
+            <a href="#" class="block px-3 py-2 rounded-md hover:bg-indigo-800">Simulados</a>
+            <a href="#" class="block px-3 py-2 rounded-md hover:bg-indigo-800">Meu Progresso</a>
+            <a href="{% url 'logout' %}" class="block px-3 py-2 rounded-md hover:bg-red-600">Sair</a>
             {% else %}
-                <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md hover:bg-indigo-800">Entrar</a>
+            <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md hover:bg-indigo-800">Entrar</a>
             {% endif %}
         </div>
     </nav>
@@ -60,4 +169,5 @@
         &copy; 2026 EduAdapt - Sistema de Aprendizagem Dinâmica
     </footer>
 </body>
+
 </html>

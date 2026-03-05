@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar Conta - EduAdapt{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[80vh] items-center justify-center py-12">
+    <div class="w-full max-w-lg bg-[var(--bg-card)] p-8 rounded-xl shadow-lg border border-[var(--border-color)]">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">Criar Conta</h1>
+            <p class="text-[var(--text-muted)] mt-2">Junte-se à plataforma e comece sua evolução</p>
+        </div>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-4">
+                    <p class="text-red-700 dark:text-red-400 text-sm">Por favor, corrija os erros abaixo.</p>
+                </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[var(--text-main)] mb-1">
+                    {{ field.label }}
+                </label>
+                
+                <div class="relative">
+                    {{ field }}
+                </div>
+
+                {% if field.help_text %}
+                    <p class="mt-1 text-xs text-[var(--text-muted)]">{{ field.help_text }}</p>
+                {% endif %}
+                
+                {% for error in field.errors %}
+                    <p class="mt-1 text-xs text-red-500 font-semibold">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="pt-4">
+                <button type="submit" 
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 uppercase tracking-wider">
+                    FINALIZAR CADASTRO
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-[var(--text-muted)]">
+            Já possui uma conta? <a href="{% url 'login' %}" class="text-indigo-600 font-semibold hover:underline">Fazer Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
