@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 class Concurso(models.Model):
     nome = models.CharField(max_length=150)
@@ -104,3 +105,27 @@ class Opcao(models.Model):
 
     def __str__(self):
         return f"Questão {self.questao.id} - {'Correta' if self.correta else 'Errada'}"
+    
+
+class DependenciaFundamento(models.Model):
+
+    fundamento = models.ForeignKey(
+        "Fundamento",
+        related_name="dependencias",
+        on_delete=models.CASCADE
+    )
+
+    prerequisito = models.ForeignKey(
+        "Fundamento",
+        related_name="desbloqueia",
+        on_delete=models.CASCADE
+    )
+
+    peso = models.FloatField(default=1.0)
+
+    class Meta:
+        unique_together = ("fundamento", "prerequisito")
+
+    def clean(self):
+        if self.fundamento == self.prerequisito:
+            raise ValidationError("Fundamento não pode depender dele mesmo.")

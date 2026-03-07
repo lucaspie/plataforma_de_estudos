@@ -15,7 +15,11 @@ def probabilidade_acerto(rating_aluno, rating_questao):
 @transaction.atomic
 def atualizar_rating(usuario, questao, acertou):
 
-    fundamentos = questao.fundamentos.all()
+    fundamentos = list(questao.fundamentos.all())
+
+    habilidades = []
+
+    objetos_habilidade = []
 
     for fundamento in fundamentos:
 
@@ -25,22 +29,29 @@ def atualizar_rating(usuario, questao, acertou):
             defaults={"habilidade": 0}
         )
 
-        rating_aluno = habilidade_obj.habilidade
-        rating_questao = questao.nivel_dinamico
+        objetos_habilidade.append(habilidade_obj)
+        habilidades.append(habilidade_obj.habilidade)
 
-        P = probabilidade_acerto(rating_aluno, rating_questao)
-        resultado = 1 if acertou else 0
+    if not habilidades:
+        return
 
-        # Atualiza aluno
-        rating_aluno_novo = rating_aluno + K_ALUNO * (resultado - P)
-        habilidade_obj.habilidade = rating_aluno_novo
+    rating_aluno = sum(habilidades) / len(habilidades)
+    rating_questao = questao.nivel_dinamico
+
+    P = probabilidade_acerto(rating_aluno, rating_questao)
+    resultado = 1 if acertou else 0
+
+    # Atualiza aluno
+    for habilidade_obj in objetos_habilidade:
+
+        habilidade_obj.habilidade += K_ALUNO * (resultado - P)
         habilidade_obj.save()
 
-        # Atualiza questão
-        rating_questao_novo = rating_questao + K_QUESTAO * (P - resultado)
-        questao.nivel_dinamico = rating_questao_novo
+    # Atualiza questão (UMA vez)
+    questao.nivel_dinamico += K_QUESTAO * (P - resultado)
 
     questao.total_respostas += 1
+
     if acertou:
         questao.total_acertos += 1
 

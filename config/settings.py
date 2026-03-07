@@ -84,6 +84,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+CELERY_TASK_ALWAYS_EAGER = True
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

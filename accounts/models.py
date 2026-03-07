@@ -36,9 +36,10 @@ class PerfilUsuario(models.Model):
         return self.user.username
     
 class HabilidadeUsuarioFundamento(models.Model):
-    usuario = models.OneToOneField(
+
+    usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE
     )
 
     fundamento = models.ForeignKey(
@@ -52,26 +53,3 @@ class HabilidadeUsuarioFundamento(models.Model):
 
     class Meta:
         unique_together = ("usuario", "fundamento")
-
-    questao = models.ForeignKey(
-        Questao,
-        on_delete=models.CASCADE
-    )
-
-    opcao_escolhida = models.ForeignKey(
-        Opcao,
-        on_delete=models.SET_NULL,
-        null=True
-    )
-
-    acertou = models.BooleanField()
-    tempo_em_segundos = models.PositiveIntegerField()
-
-    data_resolucao = models.DateTimeField(auto_now_add=True)
-
-    MODO_CHOICES = [
-        ("L", "Lista"),
-        ("S", "Simulado"),
-    ]
-
-    modo = models.CharField(max_length=1, choices=MODO_CHOICES)

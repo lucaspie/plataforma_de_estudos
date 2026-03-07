@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 from academico.models import Questao
 from motor.services.nivelamento import atualizar_rating
+from motor.services.spaced_repetition import atualizar_memoria
 
 User = get_user_model()
 
@@ -13,6 +14,7 @@ def processar_resposta(usuario_id, questao_id, acertou):
     questao = Questao.objects.get(id=questao_id)
 
     atualizar_rating(usuario, questao, acertou)
+    atualizar_memoria(usuario, questao, acertou)
 
     #Na view onde criar HistoricoResolucao:
     #processar_resposta.delay(usuario.id, questao.id, acertou)

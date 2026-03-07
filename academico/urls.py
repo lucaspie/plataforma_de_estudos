@@ -33,13 +33,16 @@ urlpatterns = [
     path("opcoes/<int:pk>/deletar/", views.OpcaoDeleteView.as_view(), name="opcao_delete"),
 
 
+    path("skill-graph/visualizacao/", views.SkillGraphView.as_view(), name="skill_graph_visualizacao"),
+    path("skill-graph/", views.DependenciaFundamentoListView.as_view(), name="skill_graph_list"),
+    path("skill-graph/criar/", views.DependenciaFundamentoCreateView.as_view(), name="skill_graph_create"),
+    path("skill-graph/<int:pk>/editar/", views.DependenciaFundamentoUpdateView.as_view(), name="skill_graph_update"),
+    path("skill-graph/<int:pk>/excluir/", views.DependenciaFundamentoDeleteView.as_view(), name="skill_graph_delete"),
+
+
     path("materias_alunos/", views.materias_list_alunos, name="materias_list_alunos"),
-
     path("materia_alunos/<int:pk>/",views.materia_detail_alunos, name="materia_detail_alunos"),
-
     path("lista/materia/<int:pk>/", views.gerar_lista_materia_alunos, name="lista_materia_alunos"),
-
     path("lista/topico/<int:pk>/", views.gerar_lista_topico_alunos, name="lista_topico_alunos"),
-
     path("lista/fundamento/<int:pk>/", views.gerar_lista_fundamento_alunos, name="lista_fundamento_alunos"),
 ]

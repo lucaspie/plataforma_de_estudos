@@ -12,6 +12,9 @@ from .forms import CadastroUsuarioForm, EditarUsuarioForm
 from .decorators import role_required
 from academico.models import Questao, Concurso, Materia
 from avaliacao.models import Simulado, HistoricoResolucao
+from analytics.services.diagnostico import diagnostico_usuario
+from motor.services.learning_engine import relatorio_completo
+from analytics.services.trilha import gerar_trilha_usuario
 
 
 @login_required
@@ -20,6 +23,7 @@ def dashboard(request):
     usuario = request.user
 
     historico = HistoricoResolucao.objects.filter(usuario=usuario)
+    trilha = gerar_trilha_usuario(request.user)
 
     total_resolvidas = historico.count()
     total_acertos = historico.filter(acertou=True).count()
@@ -28,7 +32,8 @@ def dashboard(request):
     if total_resolvidas > 0:
         taxa_acerto = round((total_acertos / total_resolvidas) * 100)
 
-    # progresso por matéria
+    diagnostico = relatorio_completo(usuario)
+
     progresso_materias = (
         historico
         .select_related("questao__topico__materia")
@@ -42,10 +47,12 @@ def dashboard(request):
     materias = []
 
     for m in progresso_materias:
+
         resolvidas = m["resolvidas"]
         acertos = m["acertos"] or 0
 
         percentual = 0
+
         if resolvidas > 0:
             percentual = round((acertos / resolvidas) * 100)
 
@@ -58,6 +65,8 @@ def dashboard(request):
         "total_resolvidas": total_resolvidas,
         "taxa_acerto": taxa_acerto,
         "materias": materias,
+        "diagnostico": diagnostico,
+        "trilha": trilha
     }
 
     return render(request, "accounts/dashboard.html", context)

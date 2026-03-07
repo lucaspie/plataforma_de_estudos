@@ -5,11 +5,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.views.generic import TemplateView
 
-from .models import Concurso, Materia, Topico, Fundamento, Questao, Opcao
+from .models import Concurso, Materia, Topico, Fundamento, Questao, Opcao, DependenciaFundamento
+from avaliacao.models import HistoricoResolucao
 from .forms import ConcursoForm, MateriaForm, TopicoForm, FundamentoForm, QuestaoForm, OpcaoFormSet, OpcaoForm
+
 from accounts.decorators import role_required
 from .mixin import RoleRequiredMixin
+from academico.services.questoes_service import processar_lista_questoes
+from academico.services.lista_service import gerar_lista
+from motor.services.seletor_inteligente import selecionar_questoes_adaptativas
+from analytics.services.relatorio import relatorio_materia
 
 #Parte do concurso
 class ConcursoListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
@@ -297,6 +304,83 @@ class OpcaoDeleteView(LoginRequiredMixin, RoleRequiredMixin, DeleteView):
     required_role = "admin"
 
 
+#Parte do skill graph
+class DependenciaFundamentoCreateView(CreateView):
+    model = DependenciaFundamento
+    fields = ["fundamento", "prerequisito", "peso"]
+    template_name = "academico/form.html"
+    success_url = reverse_lazy("skill_graph_list")
+
+
+class DependenciaFundamentoListView(ListView):
+    model = DependenciaFundamento
+    template_name = "academico/skill_graph_list.html"
+    context_object_name = "dependencias"
+    paginate_by = 10
+
+    # No seu academico/views.py
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        fundamento_id = self.request.GET.get("fundamento")
+        busca = self.request.GET.get("buscar")
+
+        if fundamento_id:
+            qs = qs.filter(fundamento_id=fundamento_id)
+
+        if busca:
+            qs = qs.filter(fundamento__nome__icontains=busca)
+
+        return qs
+    
+
+class DependenciaFundamentoUpdateView(UpdateView):
+    model = DependenciaFundamento
+    fields = ["fundamento", "prerequisito", "peso"]
+    template_name = "academico/form.html"
+    success_url = reverse_lazy("skill_graph_list")
+
+
+class DependenciaFundamentoDeleteView(DeleteView):
+    model = DependenciaFundamento
+    template_name = "academico/confirm_delete.html"
+    success_url = reverse_lazy("skill_graph_list")
+
+class SkillGraphView(TemplateView):
+    template_name = "academico/skill_graph_visualizacao.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        nodes = {}
+        edges = []
+
+        dependencias = DependenciaFundamento.objects.select_related(
+            "fundamento",
+            "prerequisito"
+        )
+
+        for d in dependencias:
+
+            nodes[d.fundamento.id] = d.fundamento.nome
+            nodes[d.prerequisito.id] = d.prerequisito.nome
+
+            edges.append({
+                "source": d.prerequisito.id,
+                "target": d.fundamento.id,
+                "peso": d.peso
+            })
+
+        context["nodes"] = [
+            {"id": k, "label": v}
+            for k, v in nodes.items()
+        ]
+
+        context["edges"] = edges
+
+        return context
+
 #-----------------------------------    Parte do aluno
 @login_required
 def materias_list_alunos(request):
@@ -318,6 +402,8 @@ def materia_detail_alunos(request, pk):
         materia=materia
     ).prefetch_related("fundamentos")
 
+    relatorio = relatorio_materia(request.user, materia)
+
     # busca dinâmica
     if busca:
         topicos_list = topicos_list.filter(
@@ -334,7 +420,8 @@ def materia_detail_alunos(request, pk):
         "materia": materia,
         "page_obj": page_obj,
         "topicos": page_obj.object_list,
-        "busca": busca
+        "busca": busca,
+        "relatorio": relatorio
     })
 
 
@@ -343,9 +430,24 @@ def gerar_lista_materia_alunos(request, pk):
 
     materia = get_object_or_404(Materia, pk=pk)
 
-    questoes = Questao.objects.filter(
+    base = Questao.objects.filter(
         topico__materia=materia
-    ).distinct()
+    )
+
+    questoes = gerar_lista(request.user, base)
+
+    if request.method == "POST":
+
+        resultados, acertos, respostas_usuario = processar_lista_questoes(request, questoes)
+
+        return render(request, "aluno/lista_questoes.html", {
+            "questoes": questoes,
+            "titulo": f"Questões de {materia.nome}",
+            "resultados": resultados,
+            "acertos": acertos,
+            "total": len(questoes),
+            "respostas_usuario": respostas_usuario
+        })
 
     return render(request, "aluno/lista_questoes.html", {
         "questoes": questoes,
@@ -358,9 +460,24 @@ def gerar_lista_topico_alunos(request, pk):
 
     topico = get_object_or_404(Topico, pk=pk)
 
-    questoes = Questao.objects.filter(
+    base = Questao.objects.filter(
         topico=topico
     )
+
+    questoes = gerar_lista(request.user, base)
+
+    if request.method == "POST":
+
+        resultados, acertos, respostas_usuario = processar_lista_questoes(request, questoes)
+
+        return render(request, "aluno/lista_questoes.html", {
+            "questoes": questoes,
+            "titulo": f"Questões de {topico.nome}",
+            "resultados": resultados,
+            "acertos": acertos,
+            "total": len(questoes),
+            "respostas_usuario": respostas_usuario
+        })
 
     return render(request, "aluno/lista_questoes.html", {
         "questoes": questoes,
@@ -373,9 +490,24 @@ def gerar_lista_fundamento_alunos(request, pk):
 
     fundamento = get_object_or_404(Fundamento, pk=pk)
 
-    questoes = Questao.objects.filter(
+    base = Questao.objects.filter(
         fundamentos=fundamento
     )
+
+    questoes = gerar_lista(request.user, base)
+
+    if request.method == "POST":
+
+        resultados, acertos, respostas_usuarios = processar_lista_questoes(request, questoes)
+
+        return render(request, "aluno/lista_questoes.html", {
+            "questoes": questoes,
+            "titulo": f"Questões de {fundamento.nome}",
+            "resultados": resultados,
+            "acertos": acertos,
+            "total": len(questoes),
+            "respostas_usuario": respostas_usuarios
+        })
 
     return render(request, "aluno/lista_questoes.html", {
         "questoes": questoes,
