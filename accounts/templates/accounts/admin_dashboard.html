@@ -131,6 +131,65 @@
 
     </div>
 
+    <div
+        class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border-color)] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div class="p-6 border-b border-[var(--border-color)] bg-gray-50/30 dark:bg-slate-800/30">
+            <h3 class="text-lg font-bold text-[var(--text-main)] flex items-center gap-2">
+                <span class="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg text-indigo-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </span>
+                Importar Edital (PDF)
+            </h3>
+        </div>
+
+        <div class="p-6">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'importar_cronograma' %}"
+                class="space-y-6">
+                {% csrf_token %}
+
+                <div class="flex items-center justify-center w-full">
+                    <label for="dropzone-file"
+                        class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-[var(--border-color)] rounded-2xl cursor-pointer bg-[var(--bg-main)] hover:bg-gray-50 dark:hover:bg-slate-800 transition-all group">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-10 h-10 mb-3 text-gray-400 group-hover:text-indigo-500 transition-colors"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p class="mb-2 text-sm text-[var(--text-main)] font-semibold">Clique para fazer upload</p>
+                            <p class="text-xs text-[var(--text-muted)]" id="file-name">Selecione o PDF do edital (ex:
+                                ITA 2026)</p>
+                        </div>
+                        <input id="dropzone-file" type="file" name="arquivo" class="hidden" accept=".pdf" required
+                            onchange="updateFileName(this)" />
+                    </label>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Iniciar Processamento com IA
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateFileName(input) {
+            const display = document.getElementById('file-name');
+            if (input.files.length > 0) {
+                display.innerText = "Arquivo selecionado: " + input.files[0].name;
+                display.classList.add('text-indigo-600', 'font-bold');
+            }
+        }
+    </script>
+
     <div class="bg-[var(--bg-card)] rounded-2xl shadow-sm border border-[var(--border-color)] overflow-hidden">
         <div
             class="p-6 border-b border-[var(--border-color)] flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
@@ -147,24 +206,6 @@
                     Buscar
                 </button>
             </form>
-        </div>
-
-        <div class="bg-[var(--bg-card)] p-6 rounded-2xl shadow-sm border border-[var(--border-color)]">
-
-            <h3 class="text-lg font-bold mb-4">Importar Conteúdo Educacional</h3>
-
-            <form method="POST" enctype="multipart/form-data" action="{% url 'importar_cronograma' %}">
-                {% csrf_token %}
-
-                <input type="file" name="arquivo" class="block w-full text-sm mb-4" required>
-
-                <button type="submit"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-all">
-                    Importar PDF
-                </button>
-
-            </form>
-
         </div>
 
         <div class="overflow-x-auto">

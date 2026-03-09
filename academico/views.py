@@ -24,6 +24,7 @@ from analytics.services.relatorio import relatorio_materia
 from analytics.services.trilha import gerar_trilha_usuario
 from motor_extracao.services.cronogramas.salvar_cronograma import salvar_no_banco
 from motor_extracao.services.extractors.pdf_text_extractor import extrair_texto_pdf
+from motor_extracao.services.cronogramas.pipeline import extrator_edital
 
 #Parte do concurso
 class ConcursoListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
@@ -591,25 +592,32 @@ def gerar_lista_fundamento_alunos(request, pk):
 
 @staff_member_required
 def importar_cronograma(request):
-
     if request.method == "POST":
-
         arquivo = request.FILES.get("arquivo")
-
+        
         if not arquivo:
             messages.error(request, "Envie um arquivo.")
             return redirect("admin_dashboard")
 
         try:
+            # 1. Extrai o texto bruto do PDF (Retorna String)
+            texto_bruto = extrair_texto_pdf(arquivo)
 
-            dados = extrair_texto_pdf(arquivo)
+            # 2. USA O SEU EXTRATOR (Aqui a String vira a Lista de Dicionários que você criou)
+            # É este passo que evita o erro de "string indices"!
+            dados_estruturados = extrator_edital(texto_bruto)
 
-            salvar_no_banco(dados)
+            if not dados_estruturados:
+                messages.warning(request, "O PDF foi lido, mas nenhuma estrutura de matéria foi detectada.")
+                return redirect("admin_dashboard")
 
-            messages.success(request, "Conteúdo importado com sucesso.")
+            # 3. Agora sim, envia a LISTA para o salvamento
+            salvar_no_banco(dados_estruturados)
+
+            messages.success(request, f"Importação concluída! {len(dados_estruturados)} matérias processadas.")
 
         except Exception as e:
-
+            # Se der erro aqui, agora saberemos exatamente o porquê
             messages.error(request, f"Erro na importação: {e}")
 
         return redirect("admin_dashboard")

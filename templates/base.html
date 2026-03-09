@@ -112,6 +112,11 @@
 </head>
 
 <body class="font-sans" style="background: var(--bg-main); color: var(--text-main);">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}"> {{ message }} </div>
+        {% endfor %}
+    {% endif %}
 
     <nav class="bg-indigo-600 text-white shadow-md" x-data="{ open: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
