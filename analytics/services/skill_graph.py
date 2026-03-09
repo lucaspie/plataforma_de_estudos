@@ -1,4 +1,4 @@
-from academico.models import Fundamento, DependenciaFundamento
+from academico.models import DependenciaFundamento
 
 
 def obter_prerequisitos(fundamento_id, profundidade=2):
@@ -24,7 +24,8 @@ def obter_prerequisitos(fundamento_id, profundidade=2):
             if d.prerequisito_id not in visitados:
 
                 visitados.add(d.prerequisito_id)
-                prereqs.append(d.prerequisito)
+
+                prereqs.append(d.prerequisito_id)  # ← mudança
 
                 fila.append((d.prerequisito_id, nivel + 1))
 

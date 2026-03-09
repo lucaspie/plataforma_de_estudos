@@ -1,3 +1,5 @@
+import json
+
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
@@ -17,6 +19,7 @@ from academico.services.questoes_service import processar_lista_questoes
 from academico.services.lista_service import gerar_lista
 from motor.services.seletor_inteligente import selecionar_questoes_adaptativas
 from analytics.services.relatorio import relatorio_materia
+from analytics.services.trilha import gerar_trilha_usuario
 
 #Parte do concurso
 class ConcursoListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
@@ -318,13 +321,26 @@ class DependenciaFundamentoListView(ListView):
     context_object_name = "dependencias"
     paginate_by = 10
 
-    # No seu academico/views.py
-
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().select_related(
+            "fundamento__topico__materia",
+            "prerequisito__topico__materia"
+        )
 
         fundamento_id = self.request.GET.get("fundamento")
         busca = self.request.GET.get("buscar")
+        materia_id = self.request.GET.get("materia")
+        topico_id = self.request.GET.get("topico")
+
+        if materia_id:
+            qs = qs.filter(
+                fundamento__topico__materia_id=materia_id
+            )
+
+        if topico_id:
+            qs = qs.filter(
+                fundamento__topico_id=topico_id
+            )
 
         if fundamento_id:
             qs = qs.filter(fundamento_id=fundamento_id)
@@ -333,7 +349,32 @@ class DependenciaFundamentoListView(ListView):
             qs = qs.filter(fundamento__nome__icontains=busca)
 
         return qs
-    
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        materia_id = self.request.GET.get("materia")
+        topico_id = self.request.GET.get("topico")
+
+        context["materias"] = Materia.objects.all()
+
+        context["topicos"] = (
+            Topico.objects.filter(materia_id=materia_id)
+            if materia_id else Topico.objects.none()
+        )
+
+        context["fundamentos"] = (
+            Fundamento.objects.filter(topico_id=topico_id)
+            if topico_id else Fundamento.objects.none()
+        )
+
+        context["materia_selected"] = materia_id
+        context["topico_selected"] = topico_id
+        context["fundamento_selected"] = self.request.GET.get("fundamento")
+
+        return context
+
 
 class DependenciaFundamentoUpdateView(UpdateView):
     model = DependenciaFundamento
@@ -347,19 +388,35 @@ class DependenciaFundamentoDeleteView(DeleteView):
     template_name = "academico/confirm_delete.html"
     success_url = reverse_lazy("skill_graph_list")
 
+
 class SkillGraphView(TemplateView):
     template_name = "academico/skill_graph_visualizacao.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        nodes = {}
-        edges = []
+        materia_id = self.request.GET.get("materia")
+        topico_id = self.request.GET.get("topico")
 
         dependencias = DependenciaFundamento.objects.select_related(
-            "fundamento",
-            "prerequisito"
+            "fundamento__topico__materia",
+            "prerequisito__topico__materia"
         )
+
+        # FILTRO POR MATÉRIA
+        if materia_id:
+            dependencias = dependencias.filter(
+                fundamento__topico__materia_id=materia_id
+            )
+
+        # FILTRO POR TÓPICO
+        if topico_id:
+            dependencias = dependencias.filter(
+                fundamento__topico_id=topico_id
+            )
+
+        nodes = {}
+        edges = []
 
         for d in dependencias:
 
@@ -379,7 +436,17 @@ class SkillGraphView(TemplateView):
 
         context["edges"] = edges
 
+        # dados para filtros
+        context["materias"] = Materia.objects.all()
+        context["topicos"] = Topico.objects.filter(
+            materia_id=materia_id
+        ) if materia_id else Topico.objects.none()
+
+        context["materia_selected"] = materia_id
+        context["topico_selected"] = topico_id
+
         return context
+
 
 #-----------------------------------    Parte do aluno
 @login_required
@@ -403,6 +470,7 @@ def materia_detail_alunos(request, pk):
     ).prefetch_related("fundamentos")
 
     relatorio = relatorio_materia(request.user, materia)
+    trilha = gerar_trilha_usuario(request.user)
 
     # busca dinâmica
     if busca:
@@ -421,7 +489,9 @@ def materia_detail_alunos(request, pk):
         "page_obj": page_obj,
         "topicos": page_obj.object_list,
         "busca": busca,
-        "relatorio": relatorio
+        "relatorio": relatorio,
+        "mapa_json": json.dumps(relatorio["mapa"]),
+        "trilha": trilha
     })
 
 

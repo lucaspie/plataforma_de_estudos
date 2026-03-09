@@ -132,7 +132,6 @@
     </div>
 </div>
 
-
 <div class="space-y-8 animate-fade-in pb-10">
 
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -146,17 +145,71 @@
         </div>
     </div>
 
+<div class="space-y-6">
+    <div class="flex items-center gap-3 mb-2">
+        <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+        </div>
+        <h2 class="text-2xl font-black text-[var(--text-main)] tracking-tight">Sua trilha de aprendizado</h2>
+    </div>
+
+    <div class="grid gap-4">
+        {% for item in trilha %}
+        <div class="group relative bg-[var(--bg-card)] p-6 rounded-3xl border border-[var(--border-color)] shadow-sm hover:border-indigo-500/50 transition-all hover:shadow-md overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center border border-indigo-100 dark:border-indigo-800">
+                    <span class="text-indigo-600 font-bold text-sm">{{ forloop.counter }}</span>
+                </div>
+
+                <div class="flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <h4 class="font-black text-[var(--text-main)] text-lg leading-tight">
+                            {{ item.fundamento }}
+                        </h4>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-widest border border-rose-100 dark:border-rose-800">
+                            Revisão Necessária
+                        </span>
+                    </div>
+                    
+                    <p class="text-[var(--text-muted)] text-sm mt-2 leading-relaxed italic">
+                        "{{ item.motivo }}"
+                    </p>
+                </div>
+
+                <div class="hidden sm:flex items-center self-center">
+                    <div class="p-2 rounded-xl bg-gray-50 dark:bg-slate-800 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-emerald-50 dark:bg-emerald-900/10 border-2 border-dashed border-emerald-200 dark:border-emerald-800/30 p-10 rounded-[2rem] text-center">
+            <span class="text-4xl mb-4 block">🎉</span>
+            <h3 class="text-xl font-bold text-emerald-800 dark:text-emerald-400">Excelente desempenho!</h3>
+            <p class="text-emerald-600/80 dark:text-emerald-500/80 text-sm mt-1">Você não possui fundamentos fracos identificados no momento.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         
         <div class="md:col-span-2 bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-[2rem] text-white shadow-xl shadow-indigo-500/20 relative overflow-hidden group">
             <div class="relative z-10">
                 <p class="text-indigo-100 text-sm font-bold uppercase tracking-widest opacity-80">Precisão Geral</p>
                 <div class="flex items-baseline gap-2 mt-2">
-                    <h2 class="text-5xl font-black">{{ taxa_acerto|floatformat:0 }}%</h2>
+                    <h2 class="text-5xl font-black">{{ relatorio.taxa_acerto|floatformat:0 }}%</h2>
                     <span class="text-indigo-200 text-sm">de aproveitamento</span>
                 </div>
                 <div class="mt-6 h-2 w-full bg-white/20 rounded-full overflow-hidden">
-                    <div class="h-full bg-white transition-all duration-1000" style="width: {{ taxa_acerto }}%"></div>
+                    <div class="h-full bg-white transition-all duration-1000" style="width: {{ relatorio.taxa_acerto }}%"></div>
                 </div>
             </div>
             <svg class="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 transform rotate-12 transition-transform group-hover:scale-110" fill="currentColor" viewBox="0 0 20 20">
@@ -170,7 +223,7 @@
                 <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                 </div>
-                <h3 class="text-3xl font-black text-[var(--text-main)]">{{ total_respondidas }}</h3>
+                <h3 class="text-3xl font-black text-[var(--text-main)]">{{ relatorio.total_respondidas }}</h3>
             </div>
         </div>
 
@@ -180,18 +233,181 @@
                 <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-                <h3 class="text-3xl font-black text-[var(--text-main)]">{{ tempo_medio }}s</h3>
+                <h3 class="text-3xl font-black text-[var(--text-main)]">{{ relatorio.tempo_medio }}s</h3>
             </div>
         </div>
     </div>
 
-    <div class="bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-8">
-        <h3 class="text-xl font-bold text-[var(--text-main)] mb-6 flex items-center gap-2">
+    <div class="bg-[var(--bg-card)] rounded-[2rem] border border-[var(--border-color)] p-8 shadow-sm overflow-hidden relative">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <h3 class="text-xl font-bold text-[var(--text-main)] flex items-center gap-2">
             <span class="w-2 h-6 bg-indigo-600 rounded-full"></span>
             Mapa de Dependências
         </h3>
-        <div id="cy" style="height: 500px;"></div>
+        <div class="flex gap-4 text-[10px] font-black uppercase tracking-wider">
+            <span class="flex items-center gap-1.5 text-emerald-600"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Domínio</span>
+            <span class="flex items-center gap-1.5 text-amber-500"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Em Revisão</span>
+            <span class="flex items-center gap-1.5 text-rose-500"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Atenção</span>
+        </div>
     </div>
+    
+    <div id="cy" class="bg-gray-50/50 dark:bg-slate-900/20 rounded-2xl border border-[var(--border-color)] transition-all" style="height: 550px;"></div>
+</div>
+
+<script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+
+<script>
+const data = {{ mapa_json|safe }}
+
+const cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: [...data.nodes, ...data.edges],
+    
+    // Configuração de Estilo Visual "Moderno"
+    style: [
+        {
+            selector: 'node',
+            style: {
+                'label': 'data(label)',
+                'width': '60px',
+                'height': '60px',
+                'font-family': 'Inter, system-ui, sans-serif',
+                'font-size': '12px',
+                'font-weight': '700',
+                'text-valign': 'bottom',
+                'text-margin-y': '8px',
+                'color': '#6366f1', // Indigo 500
+                'background-color': (ele) => {
+                    const rating = ele.data("rating");
+                    if (rating > 800) return "#10b981"; // Emerald 500
+                    if (rating > 600) return "#f59e0b"; // Amber 500
+                    return "#f43f5e"; // Rose 500
+                },
+                'border-width': 4,
+                'border-color': '#ffffff',
+                'overlay-opacity': 0,
+                'transition-property': 'background-color, line-color, target-arrow-color, width, height',
+                'transition-duration': '0.3s'
+            }
+        },
+        {
+            selector: 'edge',
+            style: {
+                'width': 3,
+                'line-color': '#cbd5e1', // Slate 300
+                'target-arrow-color': '#cbd5e1',
+                'target-arrow-shape': 'triangle',
+                'curve-style': 'bezier',
+                'arrow-scale': 1.2,
+                'line-dash-pattern': [6, 3],
+                'opacity': 0.6
+            }
+        },
+        // Estilo ao Clicar/Selecionar
+        {
+            selector: 'node:selected',
+            style: {
+                'border-width': 6,
+                'border-color': '#6366f1',
+                'width': '70px',
+                'height': '70px'
+            }
+        }
+    ],
+
+    layout: {
+        name: 'breadthfirst',
+        directed: true,
+        padding: 40,
+        spacingFactor: 1.2,
+        animate: true,
+        animationDuration: 1000
+    },
+    
+    // Melhorias de UX
+    userZoomingEnabled: true,
+    userPanningEnabled: true,
+    boxSelectionEnabled: false
+});
+
+// Efeito visual: destacar conexões ao clicar em um nó
+cy.on('tap', 'node', function(evt){
+    const node = evt.target;
+    cy.elements().removeClass('highlighted');
+    node.neighborhood().addClass('highlighted');
+    node.addClass('highlighted');
+});
+
+// Resetar ao clicar no fundo
+cy.on('tap', function(evt){
+    if( evt.target === cy ){
+        cy.elements().removeClass('highlighted');
+    }
+});
+</script>
+
+<style>
+    /* Estilo para destaque de conexões via JS */
+    .highlighted {
+        z-index: 999;
+    }
+</style>
 
 </div>
+
+<script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+
+<script>
+
+const data = {{ mapa_json|safe }}
+
+const cy = cytoscape({
+
+    container: document.getElementById('cy'),
+
+    elements: [
+        ...data.nodes,
+        ...data.edges
+    ],
+
+    style: [
+
+        {
+            selector: 'node',
+            style: {
+                'label': 'data(label)',
+                'text-valign': 'center',
+                'color': '#fff',
+                'background-color': ele => {
+
+                    const rating = ele.data("rating")
+
+                    if (rating > 800) return "#16a34a"
+                    if (rating > 600) return "#eab308"
+                    return "#ef4444"
+                }
+            }
+        },
+
+        {
+            selector: 'edge',
+            style: {
+                'width': 2,
+                'line-color': '#94a3b8',
+                'target-arrow-color': '#94a3b8',
+                'target-arrow-shape': 'triangle'
+            }
+        }
+
+    ],
+
+    layout: {
+        name: 'breadthfirst',
+        directed: true,
+        padding: 10
+    }
+
+})
+
+</script>
 {% endblock %}

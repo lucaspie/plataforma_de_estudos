@@ -4,8 +4,8 @@ from django.db import transaction
 from accounts.models import HabilidadeUsuarioFundamento
 from academico.models import Questao
 
-K_ALUNO = 24
-K_QUESTAO = 8
+K_ALUNO = 32
+K_QUESTAO = 12
 
 
 def probabilidade_acerto(rating_aluno, rating_questao):

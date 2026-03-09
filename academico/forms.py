@@ -48,7 +48,7 @@ OpcaoFormSet = inlineformset_factory(
     Questao,
     Opcao,
     fields=("texto", "correta", "comentario"),
-    extra=4,
+    extra=5,
     can_delete=True
 )
 

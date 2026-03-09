@@ -42,6 +42,18 @@ class Fundamento(models.Model):
 
     def __str__(self):
         return f"{self.topico.nome} - {self.nome}"
+ 
+
+class Prova(models.Model):
+
+    concurso = models.ForeignKey(Concurso, on_delete=models.CASCADE)
+
+    fase = models.IntegerField()
+
+    ano = models.IntegerField()
+
+    nome = models.CharField(max_length=200)
+ 
     
 class Questao(models.Model):
 
@@ -72,7 +84,7 @@ class Questao(models.Model):
 
     # Níveis
     nivel_sugerido = models.IntegerField()
-    nivel_dinamico = models.FloatField(null=True, blank=True)
+    nivel_dinamico = models.FloatField(null=True, blank=True, default=1000)
 
     # Estatísticas globais
     total_respostas = models.PositiveIntegerField(default=0)
@@ -83,6 +95,10 @@ class Questao(models.Model):
     resolucao_mestra = models.TextField(blank=True)
 
     data_criacao = models.DateTimeField(auto_now_add=True)
+    
+    prova = models.ForeignKey(Prova, blank=True, null= True, on_delete=models.PROTECT,
+        related_name="questoes")
+    numero = models.IntegerField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if self.nivel_dinamico is None:

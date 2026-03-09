@@ -24,10 +24,10 @@ def calcular_desempenho_por_fundamento(usuario):
 
         for f in fundamentos:
 
-            stats[f.nome]["total"] += 1
+            stats[f.id]["total"] += 1
 
             if r.acertou:
-                stats[f.nome]["acertos"] += 1
+                stats[f.id]["acertos"] += 1
 
 
     desempenho = {}
@@ -114,7 +114,7 @@ def questoes_erradas_recentes(usuario, limite=5):
 def selecionar_por_fundamento(fundamentos, quantidade):
 
     qs = Questao.objects.filter(
-        fundamentos__nome__in=fundamentos
+        fundamentos__id__in=fundamentos
     ).distinct()
 
     qs = list(qs)
@@ -142,7 +142,7 @@ def dificuldade_alvo(usuario, fundamentos):
 
     habilidades = HabilidadeUsuarioFundamento.objects.filter(
         usuario=usuario,
-        fundamento__nome__in=fundamentos
+        fundamento__id__in=fundamentos
     )
 
     if not habilidades.exists():
@@ -158,7 +158,7 @@ def selecionar_por_dificuldade(fundamentos, habilidade, quantidade):
     margem = max(100, habilidade * 0.2)
 
     qs = Questao.objects.filter(
-        fundamentos__nome__in=fundamentos,
+        fundamentos__id__in=fundamentos,
         nivel_dinamico__gte=habilidade - margem,
         nivel_dinamico__lte=habilidade + margem
     ).distinct()
@@ -188,7 +188,7 @@ def fundamentos_dominados(usuario):
     for h in habilidades:
 
         if h.habilidade > 800:
-            dominados.append(h.fundamento.nome)
+            dominados.append(h.fundamento__id)
 
     return dominados
 
@@ -247,11 +247,11 @@ def gerar_sessao_adaptativa(usuario, queryset_base, total=20):
         prereqs = obter_prerequisitos(f)
 
         for p in prereqs:
-            fundamentos_expandidos.add(p.nome)
+            fundamentos_expandidos.add(p)
 
     fracos = list(fundamentos_expandidos)
 
-    qf, qm, qs = calcular_distribuicao(
+    qf, qm, qfortes = calcular_distribuicao(
         restantes,
         fracos,
         medios,
@@ -265,7 +265,7 @@ def gerar_sessao_adaptativa(usuario, queryset_base, total=20):
         habilidade = dificuldade_alvo(usuario, fracos)
 
         qs_fracos = base.filter(
-            fundamentos__nome__in=fracos,
+            fundamentos__id__in=fracos,
             nivel_dinamico__gte=habilidade-150,
             nivel_dinamico__lte=habilidade+150
         ).distinct()
@@ -277,7 +277,7 @@ def gerar_sessao_adaptativa(usuario, queryset_base, total=20):
         habilidade = dificuldade_alvo(usuario, medios)
 
         qs_medios = base.filter(
-            fundamentos__nome__in=medios,
+            fundamentos__id__in=medios,
             nivel_dinamico__gte=habilidade-150,
             nivel_dinamico__lte=habilidade+150
         ).distinct()
@@ -289,12 +289,12 @@ def gerar_sessao_adaptativa(usuario, queryset_base, total=20):
         habilidade = dificuldade_alvo(usuario, fortes)
 
         qs_fortes = base.filter(
-            fundamentos__nome__in=fortes,
+            fundamentos__id__in=fortes,
             nivel_dinamico__gte=habilidade-1,
             nivel_dinamico__lte=habilidade+1
         ).distinct()
 
-        sessao += random.sample(list(qs_fortes), min(qs, qs_fortes.count()))
+        sessao += random.sample(list(qs_fortes), min(qfortes, qs_fortes.count()))
 
 
     dominados = fundamentos_dominados(usuario)
@@ -305,7 +305,7 @@ def gerar_sessao_adaptativa(usuario, queryset_base, total=20):
     if len(sessao) == 0:
         return list(base.order_by("?")[:total])
     
-    dificeis = questoes_dificeis(base.filter(fundamentos__nome__in=dominados))
+    dificeis = questoes_dificeis(base.filter(fundamentos__id__in=dominados))
 
     dificeis = dificeis.exclude(id__in=[q.id for q in sessao])[:3]
     sessao += list(dificeis)

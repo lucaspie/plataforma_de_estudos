@@ -14,6 +14,58 @@
                 Visualização dinâmica das dependências e pré-requisitos de conhecimento.
             </p>
         </div>
+
+        <form method="get" class="flex flex-col sm:flex-row items-end gap-4 bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-color)] shadow-sm">
+    
+    <div class="w-full sm:w-auto flex-1 group">
+        <label class="block text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1.5 ml-1">
+            Matéria
+        </label>
+        <div class="relative">
+            <select name="materia" 
+                    onchange="this.form.submit()"
+                    class="appearance-none block w-full bg-[var(--bg-main)] border-2 border-[var(--border-color)] text-[var(--text-main)] text-sm font-bold rounded-xl py-2.5 pl-4 pr-10 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer">
+                <option value="">Todas as matérias</option>
+                {% for m in materias %}
+                <option value="{{ m.id }}" {% if materia_selected == m.id|stringformat:"s" %}selected{% endif %}>
+                    {{ m.nome }}
+                </option>
+                {% endfor %}
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-indigo-500">
+                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full sm:w-auto flex-1 group">
+        <label class="block text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-1.5 ml-1">
+            Tópico Específico
+        </label>
+        <div class="relative">
+            <select name="topico" 
+                    onchange="this.form.submit()"
+                    class="appearance-none block w-full bg-[var(--bg-main)] border-2 border-[var(--border-color)] text-[var(--text-main)] text-sm font-bold rounded-xl py-2.5 pl-4 pr-10 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all cursor-pointer">
+                <option value="">Todos os tópicos</option>
+                {% for t in topicos %}
+                <option value="{{ t.id }}" {% if topico_selected == t.id|stringformat:"s" %}selected{% endif %}>
+                    {{ t.nome }}
+                </option>
+                {% endfor %}
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-indigo-500">
+                <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+            </div>
+        </div>
+    </div>
+
+    {% if materia_selected or topico_selected %}
+    <a href="?" class="p-2.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-colors shadow-sm" title="Limpar Filtros">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </a>
+    {% endif %}
+</form>
+
         <div class="flex items-center gap-3">
             <a href="{% url 'skill_graph_list' %}"
                 class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95">

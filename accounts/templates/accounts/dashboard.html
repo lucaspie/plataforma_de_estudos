@@ -121,30 +121,6 @@
 
             </div>
         </div>
-        <h2>Pontos Fortes</h2>
-
-        <ul>
-            {% for f in diagnostico.fundamentos_fortes %}
-            <li>
-                {{ f.materia }} → {{ f.topico }} → {{ f.fundamento }}
-                (Habilidade {{ f.rating }}) — {{ f.acerto }}% de acerto
-            </li>
-            {% endfor %}
-        </ul>
-
-
-        <h2>Pontos Fracos</h2>
-
-        <ul>
-            {% for f in diagnostico.fundamentos_fracos %}
-            <li>
-                {{ f.materia }} → {{ f.topico }} → {{ f.fundamento }}
-                (Habilidade {{ f.rating }}) — {{ f.acerto }}% de acerto
-            </li>
-            {% endfor %}
-        </ul>
-        <h2>Trilhas</h2>
-        {{ trilhas }}
     </div>
 
     <style>

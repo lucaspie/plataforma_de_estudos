@@ -47,8 +47,8 @@ class HabilidadeUsuarioFundamento(models.Model):
         on_delete=models.CASCADE
     )
 
-    habilidade = models.FloatField(default=0)
-    consistencia = models.FloatField(default=0)
+    habilidade = models.FloatField(default=900)
+    consistencia = models.FloatField(default=0.5)
     velocidade_media = models.FloatField(default=0)
 
     class Meta:

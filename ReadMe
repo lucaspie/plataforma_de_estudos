@@ -1,1 +1,24 @@
-Put me in the git hub please!!!
+Alunos:
+| Tipo            | Rating |
+| --------------- | ------ |
+| Aluno iniciante | 900    |
+| Aluno médio     | 1100   |
+| Aluno avançado  | 1300   |
+
+Questões:
+| Dificuldade   | Rating |
+| ------------- | ------ |
+| Muito fácil   | 800    |
+| Fácil         | 900    |
+| Média         | 1000   |
+| Difícil       | 1150   |
+| Muito difícil | 1300   |
+
+
+
+| nível         | nivel_dinamico |
+| ------------- | -------------- |
+| Fácil         | 900            |
+| Médio         | 1000           |
+| Difícil       | 1150           |
+| Muito difícil | 1300           |

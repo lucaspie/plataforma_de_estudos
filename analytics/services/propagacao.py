@@ -16,7 +16,7 @@ def propagar_habilidade(usuario, fundamento, delta):
 
         visitados.add(atual.id)
 
-        fator = 1 / (nivel + 1)
+        fator = 0.6 ** nivel
 
         habilidade = HabilidadeUsuarioFundamento.objects.filter(
             usuario=usuario,
@@ -26,7 +26,7 @@ def propagar_habilidade(usuario, fundamento, delta):
         if habilidade:
 
             habilidade.habilidade += delta * fator
-            habilidade.habilidade = max(0, min(1000, habilidade.habilidade))
+            habilidade.habilidade = max(100, min(2000, habilidade.habilidade))
             habilidade.save()
 
         dependencias = DependenciaFundamento.objects.filter(
