@@ -15,6 +15,14 @@ class Materia(models.Model):
     def __str__(self):
         return self.nome
     
+    def save(self, *args, **kwargs):
+
+        from motor_extracao.services.comparador.normalizador import normalizar_texto
+
+        self.nome_normalizado = normalizar_texto(self.nome)
+
+        super().save(*args, **kwargs)
+    
 class Topico(models.Model):
     materia = models.ForeignKey(
         Materia,
@@ -25,6 +33,14 @@ class Topico(models.Model):
 
     def __str__(self):
         return f"{self.materia.nome} > {self.nome}"
+    
+    def save(self, *args, **kwargs):
+
+        from motor_extracao.services.comparador.normalizador import normalizar_texto
+
+        self.nome_normalizado = normalizar_texto(self.nome)
+
+        super().save(*args, **kwargs)
     
 class Fundamento(models.Model):
     topico = models.ForeignKey(
@@ -40,8 +56,35 @@ class Fundamento(models.Model):
         help_text="Impacto do fundamento na dificuldade real"
     )
 
+    tipo_cognitivo = models.CharField(
+        max_length=50,
+        default="conceito"
+    )
+
+    nivel_cognitivo = models.IntegerField(
+        default=1
+    )
+
     def __str__(self):
         return f"{self.topico.nome} - {self.nome}"
+    
+    def save(self, *args, **kwargs):
+
+        from motor_extracao.services.comparador.normalizador import normalizar_texto
+
+        self.nome_normalizado = normalizar_texto(self.nome)
+
+        super().save(*args, **kwargs)
+
+class FundamentoEmbedding(models.Model):
+
+    fundamento = models.OneToOneField(
+        Fundamento,
+        on_delete=models.CASCADE,
+        related_name="embedding_vector"
+    )
+
+    vetor = models.JSONField()
  
 
 class Prova(models.Model):

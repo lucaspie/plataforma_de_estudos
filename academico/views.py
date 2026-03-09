@@ -8,6 +8,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.views.generic import TemplateView
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
 
 from .models import Concurso, Materia, Topico, Fundamento, Questao, Opcao, DependenciaFundamento
 from avaliacao.models import HistoricoResolucao
@@ -20,6 +22,8 @@ from academico.services.lista_service import gerar_lista
 from motor.services.seletor_inteligente import selecionar_questoes_adaptativas
 from analytics.services.relatorio import relatorio_materia
 from analytics.services.trilha import gerar_trilha_usuario
+from motor_extracao.services.cronogramas.salvar_cronograma import salvar_no_banco
+from motor_extracao.services.extractors.pdf_text_extractor import extrair_texto_pdf
 
 #Parte do concurso
 class ConcursoListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
@@ -583,3 +587,31 @@ def gerar_lista_fundamento_alunos(request, pk):
         "questoes": questoes,
         "titulo": f"Questões de {fundamento.nome}"
     })
+
+
+@staff_member_required
+def importar_cronograma(request):
+
+    if request.method == "POST":
+
+        arquivo = request.FILES.get("arquivo")
+
+        if not arquivo:
+            messages.error(request, "Envie um arquivo.")
+            return redirect("admin_dashboard")
+
+        try:
+
+            dados = extrair_texto_pdf(arquivo)
+
+            salvar_no_banco(dados)
+
+            messages.success(request, "Conteúdo importado com sucesso.")
+
+        except Exception as e:
+
+            messages.error(request, f"Erro na importação: {e}")
+
+        return redirect("admin_dashboard")
+
+    return redirect("admin_dashboard")

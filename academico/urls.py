@@ -45,4 +45,6 @@ urlpatterns = [
     path("lista/materia/<int:pk>/", views.gerar_lista_materia_alunos, name="lista_materia_alunos"),
     path("lista/topico/<int:pk>/", views.gerar_lista_topico_alunos, name="lista_topico_alunos"),
     path("lista/fundamento/<int:pk>/", views.gerar_lista_fundamento_alunos, name="lista_fundamento_alunos"),
+
+    path("importar-cronograma/", views.importar_cronograma, name="importar_cronograma"),
 ]

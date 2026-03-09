@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'avaliacao',
     'motor',
     'analytics',
+    'motor_extracao',
 ]
 
 MIDDLEWARE = [
