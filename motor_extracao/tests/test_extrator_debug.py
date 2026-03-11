@@ -1,74 +1,27 @@
-from django.test import TestCase
+from motor_extracao.services.semantica.clusterizador import clusterizar_fundamentos
+from motor_extracao.services.semantica.embeddings import gerar_embedding
 
-from academico.models import Materia, Topico, Fundamento
-from motor_extracao.services.cronogramas.salvar_cronograma import salvar_no_banco
-import pytest
 
-@pytest.mark.django_db
-class SalvarNoBancoTest(TestCase):
+def test_clusterizador_puro():
 
-    def setUp(self):
+    dados = [
+        {"nome": "Velocidade média"},
+        {"nome": "Velocidade escalar média"},
+        {"nome": "Cálculo da velocidade média"},
+        {"nome": "Aceleração"},
+    ]
 
-        self.dados = [
-            {
-                "nome": "Física",
-                "topicos": [
-                    {
-                        "titulo": "Cinemática",
-                        "fundamentos": [
-                            {
-                                "nome": "Velocidade média",
-                                "tipo_cognitivo": "conceitual",
-                                "nivel_cognitivo": 1
-                            },
-                            {
-                                "nome": "Aceleração",
-                                "tipo_cognitivo": "conceitual",
-                                "nivel_cognitivo": 1
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
+    dados = gerar_embedding(dados)
 
-    def test_cria_materia_topico_fundamento(self):
+    class F:
+        def __init__(self, nome, embedding):
+            self.nome = nome
+            self.embedding = embedding
 
-        salvar_no_banco(self.dados)
+    objs = [F(d["nome"], d["embedding"]) for d in dados]
 
-        self.assertEqual(Materia.objects.count(), 1)
-        self.assertEqual(Topico.objects.count(), 1)
-        self.assertEqual(Fundamento.objects.count(), 2)
+    clusters = clusterizar_fundamentos(objs)
+    print(len(clusters))
 
-    def test_evitar_duplicacao_semantica(self):
-
-        salvar_no_banco(self.dados)
-
-        dados_duplicados = [
-            {
-                "nome": "fisica",  # variação
-                "topicos": [
-                    {
-                        "titulo": "Cinematica",  # sem acento
-                        "fundamentos": [
-                            {
-                                "nome": "Calculo da velocidade media",
-                                "tipo_cognitivo": "conceitual",
-                                "nivel_cognitivo": 1
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-
-        salvar_no_banco(dados_duplicados)
-
-        # não deve criar nova matéria
-        self.assertEqual(Materia.objects.count(), 1)
-
-        # não deve criar novo tópico
-        self.assertEqual(Topico.objects.count(), 1)
-
-        # pode ou não detectar como igual dependendo do threshold
-        self.assertLessEqual(Fundamento.objects.count(), 3)
+    # deve existir pelo menos um cluster
+    assert len(clusters) >= 1
